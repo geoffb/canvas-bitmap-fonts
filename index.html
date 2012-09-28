@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bitmap Fonts</title>
+</head>
+<body>
+
+	<canvas id="stage" width="640" height="480"></canvas>
+	<canvas id="buffer" width="640" height="480" style="display: none;"></canvas>
+
+	<script>
+
+		// Visible stage
+		var stage = document.getElementById("stage");
+		var ctx = stage.getContext("2d");
+
+		// Buffer used for compositing fonts
+		var buffer = document.getElementById("buffer");
+		var bufferCtx = buffer.getContext("2d");
+
+		// The font colors we're going to draw
+		var backgroundColor = "cornflowerblue";
+		var colors = ["yellow", "orange", "red", "blue", "green", "purple"];
+
+		var draw = function () {
+
+			// Paint the visible canvas with our background color
+			ctx.fillStyle = backgroundColor;
+			ctx.fillRect(0, 0, stage.width, stage.height);
+
+			// Draw a section of bitmap font using each of the colors
+			for (var i = 0, j = colors.length; i < j; ++i) {
+
+				bufferCtx.save();
+
+				// Draw mask to buffer
+				bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
+				bufferCtx.drawImage(font, 0, 0, 256, 64, 0, 0, 256, 64);
+
+				// Draw the color only where the mask exists (using source-in)
+				bufferCtx.fillStyle = colors[i];
+				bufferCtx.globalCompositeOperation = "source-in";
+				bufferCtx.fillRect(0, 0, 256, 64);
+
+				bufferCtx.restore();
+
+				// Draw the buffered text to the visible canvas
+				ctx.drawImage(buffer, 0, 0, 256, 64, 0, i * 64, 256, 64);
+
+			}
+
+		};
+
+		// Load the font image and draw when it's ready
+		var font = new Image();
+		font.onload = draw;
+		font.src = "font.png";
+
+	</script>
+
+</body>
+</html>
